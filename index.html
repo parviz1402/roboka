@@ -8,8 +8,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
   <script>
-    // جلوگیری از خطای "process is not defined" در مرورگر
-    window.process = { env: { NODE_ENV: 'production' } };
+    // تنظیمات محیطی برای جلوگیری از خطاهای متغیرهای سیستمی در مرورگر
+    window.process = { env: { NODE_ENV: 'production', API_KEY: '' } };
+    window.global = window;
   </script>
   <style>
     body {
@@ -20,14 +21,21 @@
       padding: 0;
       overflow-x: hidden;
     }
+    #root:empty::before {
+      content: 'در حال بیدار کردن روبوکا...';
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #6366f1;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
     .glass {
       background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
   </style>
   <script type="importmap">
 {
@@ -35,11 +43,11 @@
     "react": "https://esm.sh/react@18.2.0",
     "react-dom": "https://esm.sh/react-dom@18.2.0",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
-    "recharts": "https://esm.sh/recharts@2.12.7",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
+    "recharts": "https://esm.sh/recharts@2.12.7?external=react",
     "@google/genai": "https://esm.sh/@google/genai@0.2.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
   }
 }
 </script>
