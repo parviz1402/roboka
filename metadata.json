@@ -1,0 +1,8 @@
+{
+  "name": "Roboka AI Agent",
+  "description": "An advanced AI-powered social media growth and automation platform inspired by Roboclick, featuring intelligent targeting, content generation, and real-time analytics.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
