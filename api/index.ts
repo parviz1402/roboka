@@ -9,7 +9,6 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-const port = process.env.PORT || 3001;
 
 // --- Database Initialization ---
 let db;
@@ -45,7 +44,7 @@ app.get('/auth/facebook/callback', async (req, res) => {
     );
 
     console.log(`[auth]: Authentication successful. User data stored.`);
-    res.send('Login successful! You can close this tab.');
+    res.redirect('/');
   } catch (error) {
     console.error('[auth]: Authentication failed:', error);
     res.status(500).send('Failed to authenticate with Facebook.');
@@ -107,8 +106,6 @@ app.get('/api/posts', async (req, res) => {
   } catch (e) { res.status(500).send('Failed to fetch posts'); }
 });
 
-// ... (rest of the API endpoints remain the same)
-
 app.get('/api/campaigns', async (req, res) => {
   if (!db) return res.status(500).send('DB not ready');
   res.json(await db.all('SELECT * FROM campaigns'));
@@ -127,7 +124,5 @@ app.delete('/api/campaigns/:id', async (req, res) => {
     res.status(204).send();
 });
 
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
+// Export the app instance for Vercel
+export default app;

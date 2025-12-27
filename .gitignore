@@ -30,4 +30,4 @@ dist-ssr
 .env.production.local
 
 # Database files
-server/roboka.db
+api/roboka.db
