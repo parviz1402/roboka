@@ -1,18 +1,29 @@
 import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-
+import { open, Database } from 'sqlite';
 import path from 'path';
 
-export async function openDb() {
-  // Use /tmp directory for the database file in Vercel environment
-  const dbPath = process.env.VERCEL ? path.join('/tmp', 'roboka.db') : './roboka.db';
+// This variable will hold the singleton promise for the database connection.
+let dbPromise: Promise<Database> | null = null;
+
+const initializeDb = async () => {
+  // Determine the database path based on the environment.
+  const dbPath = process.env.VERCEL ? path.join('/tmp', 'roboka.db') : './api/roboka.db';
+  console.log(`[database]: Initializing database at ${dbPath}`);
 
   const db = await open({
     filename: dbPath,
     driver: sqlite3.Database
   });
 
+  // Run migrations to create tables if they don't exist.
   await db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      accessToken TEXT NOT NULL,
+      instagramAccountId TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS campaigns (
       id TEXT PRIMARY KEY,
       postId TEXT NOT NULL,
@@ -21,14 +32,20 @@ export async function openDb() {
       status TEXT NOT NULL,
       repliesCount INTEGER NOT NULL
     );
-
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      accessToken TEXT NOT NULL,
-      instagramAccountId TEXT NOT NULL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
   `);
 
+  console.log('[database]: Database tables are ready.');
   return db;
-}
+};
+
+/**
+ * Gets the singleton database connection promise.
+ * On the first call, it initializes the database.
+ * On subsequent calls, it returns the existing connection promise.
+ */
+export const getDb = () => {
+  if (!dbPromise) {
+    dbPromise = initializeDb();
+  }
+  return dbPromise;
+};
