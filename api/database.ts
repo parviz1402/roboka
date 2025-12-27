@@ -1,9 +1,14 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 
+import path from 'path';
+
 export async function openDb() {
+  // Use /tmp directory for the database file in Vercel environment
+  const dbPath = process.env.VERCEL ? path.join('/tmp', 'roboka.db') : './roboka.db';
+
   const db = await open({
-    filename: './roboka.db',
+    filename: dbPath,
     driver: sqlite3.Database
   });
 
