@@ -12,7 +12,7 @@ export const generateCampaignReply = async (
 ) => {
   try {
     // Create a new instance right before the call to ensure the latest API key is used
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
     
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
