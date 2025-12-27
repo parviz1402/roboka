@@ -1,69 +1,53 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const getAI = () => {
-  const apiKey = (window as any).process?.env?.API_KEY || "";
-  if (!apiKey) throw new Error("API_KEY_NOT_CONFIGURED");
-  return new GoogleGenAI({ apiKey });
-};
-
-export const detectAccountDetails = async (username: string) => {
-  const cleanUsername = username.replace('@', '').trim();
-  
+/**
+ * Generates a smart reply for an Instagram comment using Gemini AI.
+ * Follows @google/genai guidelines for initialization and model selection.
+ */
+export const generateSmartReply = async (commentText: string, keyword: string, niche: string) => {
   try {
-    const ai = getAI();
+    // Initializing Gemini with the provided API key as per guidelines.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    // Using gemini-3-flash-preview for basic text tasks (summarization, Q&A, management).
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
-      contents: `Search for the Instagram profile "@${cleanUsername}" and find its current follower count, its main content niche (e.g. food, tech, lifestyle), and a short bio summary. Be precise. If exact data isn't found, estimate based on public web mentions.`,
-      config: {
-        tools: [{ googleSearch: {} }],
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            followersCount: { type: Type.NUMBER, description: "Current follower count" },
-            niche: { type: Type.STRING, description: "Main category of the page" },
-            bio: { type: Type.STRING, description: "Short bio or description" },
-            isFound: { type: Type.BOOLEAN }
-          },
-          required: ["followersCount", "niche", "bio", "isFound"]
-        }
-      }
-    });
-
-    return JSON.parse(response.text || '{}');
-  } catch (e) {
-    console.warn("AI Search failed, using fallback.", e);
-    return { followersCount: 0, niche: 'نامشخص', bio: '', isFound: false };
-  }
-};
-
-export const getSocialStrategy = async (niche: string, accountInfo: string) => {
-  try {
-    const ai = getAI();
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
-      contents: `Design a high-growth strategy for an Instagram page in the "${niche}" niche. The account handle is "${accountInfo}". 
-      Include: 1. A core growth strategy (text). 2. Three specific viral content ideas. 3. Five trending hashtags.`,
+      model: 'gemini-3-flash-preview',
+      contents: `You are an AI Social Media Manager for a "${niche}" page. 
+      A user commented: "${commentText}". 
+      The trigger keyword was: "${keyword}".
+      Generate:
+      1. A short, friendly public reply to the comment (Persian).
+      2. A personalized DM (Direct Message) to send them (Persian), including a call to action.
+      Avoid sounding like a bot. Use emojis.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            strategy: { type: Type.STRING },
-            hashtags: { type: Type.ARRAY, items: { type: Type.STRING } },
-            contentIdeas: { type: Type.ARRAY, items: { type: Type.STRING } }
+            publicReply: { 
+              type: Type.STRING,
+              description: "A friendly public response in Persian."
+            },
+            directMessage: { 
+              type: Type.STRING, 
+              description: "A personalized direct message in Persian."
+            }
           },
-          required: ["strategy", "hashtags", "contentIdeas"]
+          required: ["publicReply", "directMessage"]
         }
       }
     });
-    return JSON.parse(response.text || '{}');
+
+    // Accessing the .text property directly as per documentation.
+    const jsonStr = response.text?.trim() || '{}';
+    return JSON.parse(jsonStr);
   } catch (e) {
+    console.error("Gemini API Error:", e);
+    // Graceful fallback for the user experience.
     return {
-      strategy: "تمرکز بر ریلزهای کوتاه و تعامل با فالوورهای رقبا در ساعات اوج مصرف.",
-      hashtags: ["#اکسپلوور", "#رشد_پیج", "#اینستاگرام"],
-      contentIdeas: ["پشت صحنه کسب و کار", "آموزش سریع", "چالش هفته"]
+      publicReply: "سلام! براتون ارسال شد. چک کنید. 🙏",
+      directMessage: "سلام دوست عزیز! طبق قولی که داده بودیم، این هم لینکی که میخواستید. سوالی بود در خدمتم."
     };
   }
 };
