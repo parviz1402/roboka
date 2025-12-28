@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "dev": "vite",
+  "build": "vite build && tsc --project ./server/tsconfig.json --outDir dist/server",
+  "preview": "vite preview",
+  "start": "node dist/server/index.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
